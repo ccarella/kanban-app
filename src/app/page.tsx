@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from '@/components/KanbanColumn'
-import { moveCard } from './actions'
+import { moveCard, addCard } from './actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -34,6 +34,9 @@ export default function Home() {
       ...prev,
       todo: [...prev.todo, newCard]
     }))
+
+    // Persist to database if Redis is configured
+    startTransition(() => addCard(content, 'todo'))
   }
 
   const handleDragEnd = (event: DragEndEvent) => {

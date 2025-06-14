@@ -1,27 +1,7 @@
 import { Suspense } from 'react'
-import { unstable_cache } from 'next/cache'
-
 import { BoardClient } from '@/components'
-import type { KanbanItem } from '@/components/KanbanColumn'
-import { redis } from '@/lib/redis'
+import { getBoard } from '@/app/actions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-interface BoardState {
-  todo: KanbanItem[]
-  progress: KanbanItem[]
-  done: KanbanItem[]
-}
-
-const getBoard = unstable_cache(async () => {
-  if (!redis) return { todo: [], progress: [], done: [] }
-  try {
-    const data = await redis.get<BoardState>('board')
-    if (data) return data
-  } catch {
-    return { todo: [], progress: [], done: [] }
-  }
-  return { todo: [], progress: [], done: [] }
-}, ['board'])
 
 async function Board() {
   const board = await getBoard()

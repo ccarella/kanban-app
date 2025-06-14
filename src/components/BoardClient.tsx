@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
+import { moveCard, addCard } from '@/app/actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -16,6 +17,7 @@ interface BoardClientProps {
 
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
+  const [, startTransition] = useTransition()
 
   const handleAddCard = (content: string) => {
     const newCard: KanbanItem = {
@@ -27,6 +29,9 @@ export default function BoardClient({ initialData }: BoardClientProps) {
       ...prev,
       todo: [...prev.todo, newCard]
     }))
+
+    // Persist to database
+    startTransition(() => addCard(content, 'todo'))
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -59,6 +64,9 @@ export default function BoardClient({ initialData }: BoardClientProps) {
       
       return { ...next }
     })
+
+    // Persist to database
+    startTransition(() => moveCard(cardId, fromColumnId, toColumnId))
   }
 
   return (

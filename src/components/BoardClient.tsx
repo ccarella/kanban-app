@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
-import { moveCard, addCard } from '@/app/actions'
+import { moveCard, addCard, deleteCard } from '@/app/actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -18,6 +18,16 @@ interface BoardClientProps {
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
   const [, startTransition] = useTransition()
+
+  const handleDeleteCard = (cardId: string) => {
+    setColumns(prev => ({
+      todo: prev.todo.filter(c => c.id !== cardId),
+      progress: prev.progress.filter(c => c.id !== cardId),
+      done: prev.done.filter(c => c.id !== cardId),
+    }))
+
+    startTransition(() => deleteCard(cardId))
+  }
 
   const handleAddCard = (content: string) => {
     const newCard: KanbanItem = {
@@ -72,24 +82,27 @@ export default function BoardClient({ initialData }: BoardClientProps) {
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-        <KanbanColumn 
+        <KanbanColumn
           id="todo"
-          title="Todo" 
-          accent="border-orange-500" 
+          title="Todo"
+          accent="border-orange-500"
           items={columns.todo}
           onAddCard={handleAddCard}
+          onDeleteCard={handleDeleteCard}
         />
-        <KanbanColumn 
+        <KanbanColumn
           id="progress"
-          title="In Progress" 
-          accent="border-blue-500" 
-          items={columns.progress} 
+          title="In Progress"
+          accent="border-blue-500"
+          items={columns.progress}
+          onDeleteCard={handleDeleteCard}
         />
-        <KanbanColumn 
+        <KanbanColumn
           id="done"
-          title="Done" 
-          accent="border-green-500" 
-          items={columns.done} 
+          title="Done"
+          accent="border-green-500"
+          items={columns.done}
+          onDeleteCard={handleDeleteCard}
         />
       </main>
     </DndContext>

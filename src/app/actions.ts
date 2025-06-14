@@ -137,6 +137,33 @@ export async function addCard(content: string, columnId: string) {
   }
 }
 
+export async function deleteCard(cardId: string) {
+  if (!redis) {
+    console.warn('Redis client not configured - changes will not persist')
+    return
+  }
+
+  console.log(`Deleting card ${cardId}`)
+
+  try {
+    const board = await redis.get<BoardState>('board')
+    if (!board) return
+
+    for (const key of Object.keys(board) as (keyof BoardState)[]) {
+      board[key] = board[key].filter((c) => c.id !== cardId)
+    }
+
+    await redis.set('board', board)
+    await cleanupOldKeys()
+
+    revalidatePath('/board')
+    revalidatePath('/')
+  } catch (error) {
+    console.error('Failed to delete card:', error)
+    throw error
+  }
+}
+
 // Debug function to reset the board
 export async function resetBoard() {
   if (!redis) {

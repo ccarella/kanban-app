@@ -25,8 +25,9 @@ export default function KanbanCard({
   })
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only fire onClick if we're not dragging
+    // Prevent click during drag
     if (!isDragging && onClick) {
+      e.stopPropagation()
       onClick(e)
     }
   }
@@ -34,8 +35,8 @@ export default function KanbanCard({
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
       {...attributes}
+      {...listeners}
       onClick={handleClick}
       className={cn(
         'bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm hover:shadow transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-grab',

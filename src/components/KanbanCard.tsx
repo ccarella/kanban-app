@@ -24,7 +24,7 @@ export default function KanbanCard({
     },
   })
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only fire onClick if we're not dragging
     if (!isDragging && onClick) {
       onClick(e)

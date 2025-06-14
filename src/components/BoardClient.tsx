@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
 import { moveCard, addCard } from '@/app/actions'
@@ -15,9 +15,27 @@ interface BoardClientProps {
   initialData: BoardState
 }
 
+const STORAGE_KEY = 'board-state'
+
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
   const [, startTransition] = useTransition()
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as BoardState
+        setColumns(parsed)
+      } catch {
+        // ignore parse errors and use initial data
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(columns))
+  }, [columns])
 
   const handleAddCard = (content: string) => {
     const newCard: KanbanItem = {

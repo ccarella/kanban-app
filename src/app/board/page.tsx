@@ -57,7 +57,6 @@ function BoardSkeleton() {
 export default function Page() {
   return (
     <Suspense fallback={<BoardSkeleton />}>
-      {/* @ts-expect-error Async Server Component */}
       <Board />
     </Suspense>
   )

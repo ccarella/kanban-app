@@ -44,26 +44,24 @@ export default function Home() {
       startTransition(() => moveCard(cardId, from, to))
     }
 
+  const lists = [
+    { id: 'todo', name: 'Todo', accent: 'border-orange-500', items: columns.todo },
+    { id: 'progress', name: 'In Progress', accent: 'border-blue-500', items: columns.progress },
+    { id: 'done', name: 'Done', accent: 'border-emerald-500', items: columns.done },
+  ]
+
   return (
-    <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-      <KanbanColumn
-        id="todo"
-        title="Todo"
-        items={columns.todo}
-        onDrop={handleDrop('todo')}
-      />
-      <KanbanColumn
-        id="progress"
-        title="In Progress"
-        items={columns.progress}
-        onDrop={handleDrop('progress')}
-      />
-      <KanbanColumn
-        id="done"
-        title="Done"
-        items={columns.done}
-        onDrop={handleDrop('done')}
-      />
+    <main className="min-h-screen bg-neutral-100 p-6 md:p-8 grid auto-cols-fr md:grid-cols-3 gap-6 font-sans">
+      {lists.map((list) => (
+        <KanbanColumn
+          key={list.id}
+          id={list.id}
+          title={list.name}
+          accent={list.accent}
+          items={list.items}
+          onDrop={handleDrop(list.id as keyof BoardState)}
+        />
+      ))}
     </main>
   )
 }

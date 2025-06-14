@@ -8,6 +8,9 @@ export async function moveCard(
   fromColumnId: string,
   toColumnId: string
 ) {
+  if (!redis) {
+    throw new Error('Redis client not configured')
+  }
   // remove card from its previous column
   await redis.lrem(columnCardsKey(fromColumnId), 0, cardId)
   // add card to the new column

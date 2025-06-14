@@ -16,28 +16,50 @@ interface BoardClientProps {
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
 
-  const handleDrop = (column: keyof BoardState) => (id: string) => {
+  const handleDrop = (targetColumn: keyof BoardState) => (cardId: string, fromColumnId: string) => {
     setColumns((prev) => {
       let moved: KanbanItem | undefined
       const next: BoardState = { ...prev }
-      for (const key of Object.keys(next) as Array<keyof BoardState>) {
-        const idx = next[key].findIndex((i) => i.id === id)
-        if (idx !== -1) {
-          moved = next[key].splice(idx, 1)[0]
-        }
+      
+      // Find and remove the card from its current column
+      const sourceColumn = fromColumnId as keyof BoardState
+      const idx = next[sourceColumn].findIndex((i) => i.id === cardId)
+      if (idx !== -1) {
+        moved = next[sourceColumn].splice(idx, 1)[0]
       }
-      if (moved) {
-        next[column].push(moved)
+      
+      // Add the card to the target column
+      if (moved && targetColumn !== sourceColumn) {
+        next[targetColumn].push(moved)
       }
+      
       return { ...next }
     })
   }
 
   return (
     <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-      <KanbanColumn title="Todo" items={columns.todo} onDrop={handleDrop('todo')} />
-      <KanbanColumn title="In Progress" items={columns.progress} onDrop={handleDrop('progress')} />
-      <KanbanColumn title="Done" items={columns.done} onDrop={handleDrop('done')} />
+      <KanbanColumn 
+        id="todo"
+        title="Todo" 
+        accent="border-orange-500" 
+        items={columns.todo} 
+        onDrop={handleDrop('todo')} 
+      />
+      <KanbanColumn 
+        id="progress"
+        title="In Progress" 
+        accent="border-blue-500" 
+        items={columns.progress} 
+        onDrop={handleDrop('progress')} 
+      />
+      <KanbanColumn 
+        id="done"
+        title="Done" 
+        accent="border-green-500" 
+        items={columns.done} 
+        onDrop={handleDrop('done')} 
+      />
     </main>
   )
 }

@@ -17,6 +17,18 @@ interface BoardClientProps {
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
 
+  const handleAddCard = (content: string) => {
+    const newCard: KanbanItem = {
+      id: `card-${Date.now()}`,
+      content: content
+    }
+    
+    setColumns(prev => ({
+      ...prev,
+      todo: [...prev.todo, newCard]
+    }))
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     
@@ -56,7 +68,8 @@ export default function BoardClient({ initialData }: BoardClientProps) {
           id="todo"
           title="Todo" 
           accent="border-orange-500" 
-          items={columns.todo} 
+          items={columns.todo}
+          onAddCard={handleAddCard}
         />
         <KanbanColumn 
           id="progress"

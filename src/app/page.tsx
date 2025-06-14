@@ -24,6 +24,18 @@ export default function Home() {
   const [columns, setColumns] = useState<BoardState>(initialState)
   const [, startTransition] = useTransition()
 
+  const handleAddCard = (content: string) => {
+    const newCard: KanbanItem = {
+      id: `card-${Date.now()}`,
+      content: content
+    }
+    
+    setColumns(prev => ({
+      ...prev,
+      todo: [...prev.todo, newCard]
+    }))
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     
@@ -74,6 +86,7 @@ export default function Home() {
             title={list.name}
             accent={list.accent}
             items={list.items}
+            onAddCard={list.id === 'todo' ? handleAddCard : undefined}
           />
         ))}
       </main>

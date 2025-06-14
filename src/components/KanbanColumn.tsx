@@ -66,6 +66,7 @@ export default function KanbanColumn({ id, title, accent, items, onAddCard, onCa
             key={item.id} 
             id={item.id} 
             columnId={id}
+            description={item.description}
             onClick={() => onCardClick?.(item)}
           >
             {item.content}

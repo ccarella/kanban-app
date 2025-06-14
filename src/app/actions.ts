@@ -137,6 +137,38 @@ export async function addCard(content: string, columnId: string) {
   }
 }
 
+export async function deleteCard(cardId: string, columnId: string) {
+  if (!redis) {
+    console.warn('Redis client not configured - changes will not persist')
+    return
+  }
+
+  try {
+    const board = await redis.get<BoardState>('board')
+    if (!board) {
+      return
+    }
+
+    const column = board[columnId as keyof BoardState]
+    if (!column) {
+      console.error(`Invalid column ID: ${columnId}`)
+      return
+    }
+
+    const idx = column.findIndex((c) => c.id === cardId)
+    if (idx !== -1) {
+      column.splice(idx, 1)
+      await redis.set('board', board)
+      await cleanupOldKeys()
+      revalidatePath('/board')
+      revalidatePath('/')
+    }
+  } catch (error) {
+    console.error('Failed to delete card:', error)
+    throw error
+  }
+}
+
 // Debug function to reset the board
 export async function resetBoard() {
   if (!redis) {

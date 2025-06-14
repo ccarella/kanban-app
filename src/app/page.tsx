@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from '@/components/KanbanColumn'
-import { moveCard, addCard } from './actions'
+import { moveCard, addCard, deleteCard } from './actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -73,6 +73,20 @@ export default function Home() {
     startTransition(() => moveCard(cardId, fromColumnId, toColumnId))
   }
 
+  const handleDeleteCard = (cardId: string, columnId: string) => {
+    setColumns((prev) => {
+      const next: BoardState = { ...prev }
+      const column = next[columnId as keyof BoardState]
+      const idx = column.findIndex((i) => i.id === cardId)
+      if (idx !== -1) {
+        column.splice(idx, 1)
+      }
+      return { ...next }
+    })
+
+    startTransition(() => deleteCard(cardId, columnId))
+  }
+
   const lists = [
     { id: 'todo', name: 'Todo', accent: 'border-orange-500', items: columns.todo },
     { id: 'progress', name: 'In Progress', accent: 'border-blue-500', items: columns.progress },
@@ -90,6 +104,7 @@ export default function Home() {
             accent={list.accent}
             items={list.items}
             onAddCard={list.id === 'todo' ? handleAddCard : undefined}
+            onDeleteCard={handleDeleteCard}
           />
         ))}
       </main>

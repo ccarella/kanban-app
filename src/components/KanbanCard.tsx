@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import { cn } from '@/lib/utils'
 
 export interface KanbanCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -15,21 +16,21 @@ export default function KanbanCard({
   children,
   ...props
 }: KanbanCardProps) {
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData(
-      'text/plain',
-      JSON.stringify({ cardId: id, fromColumnId: columnId })
-    )
-  }
+  const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
+    id,
+    data: { columnId },
+  })
 
   return (
     <div
-      draggable
-      onDragStart={handleDragStart}
+      ref={setNodeRef}
       className={cn(
         'bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm hover:shadow transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-grab',
+        isDragging && 'ring-2 ring-secondary',
         className
       )}
+      {...listeners}
+      {...attributes}
       {...props}
     >
       {children}

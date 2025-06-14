@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { DndContext, type DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
 
 interface BoardState {
@@ -16,28 +17,39 @@ interface BoardClientProps {
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
 
-  const handleDrop = (column: keyof BoardState) => (id: string) => {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over) return
+
+    const cardId = String(active.id)
+    const from = active.data.current?.columnId as keyof BoardState | undefined
+    const to = over.id as keyof BoardState
+
+    if (!from) return
+
     setColumns((prev) => {
       let moved: KanbanItem | undefined
       const next: BoardState = { ...prev }
       for (const key of Object.keys(next) as Array<keyof BoardState>) {
-        const idx = next[key].findIndex((i) => i.id === id)
+        const idx = next[key].findIndex((i) => i.id === cardId)
         if (idx !== -1) {
           moved = next[key].splice(idx, 1)[0]
         }
       }
       if (moved) {
-        next[column].push(moved)
+        next[to].push(moved)
       }
       return { ...next }
     })
   }
 
   return (
-    <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-      <KanbanColumn title="Todo" items={columns.todo} onDrop={handleDrop('todo')} />
-      <KanbanColumn title="In Progress" items={columns.progress} onDrop={handleDrop('progress')} />
-      <KanbanColumn title="Done" items={columns.done} onDrop={handleDrop('done')} />
-    </main>
+    <DndContext onDragEnd={handleDragEnd}>
+      <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
+        <KanbanColumn title="Todo" items={columns.todo} id="todo" accent="border-orange-500" />
+        <KanbanColumn title="In Progress" items={columns.progress} id="progress" accent="border-blue-500" />
+        <KanbanColumn title="Done" items={columns.done} id="done" accent="border-emerald-500" />
+      </main>
+    </DndContext>
   )
 }

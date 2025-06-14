@@ -6,11 +6,21 @@ import { cn } from '@/lib/utils'
 
 export interface KanbanCardProps extends React.HTMLAttributes<HTMLDivElement> {
   id: string
+  columnId: string
 }
 
-export default function KanbanCard({ id, className, children, ...props }: KanbanCardProps) {
+export default function KanbanCard({
+  id,
+  columnId,
+  className,
+  children,
+  ...props
+}: KanbanCardProps) {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData('text/plain', id)
+    e.dataTransfer.setData(
+      'text/plain',
+      JSON.stringify({ cardId: id, fromColumnId: columnId })
+    )
   }
 
   return (

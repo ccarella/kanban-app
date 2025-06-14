@@ -10,16 +10,26 @@ export interface KanbanItem {
 }
 
 interface KanbanColumnProps {
+  id: string
   title: string
   items: KanbanItem[]
-  onDrop: (id: string) => void
+  onDrop: (cardId: string, fromColumnId: string) => void
 }
 
-export default function KanbanColumn({ title, items, onDrop }: KanbanColumnProps) {
+export default function KanbanColumn({ id, title, items, onDrop }: KanbanColumnProps) {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
-    const id = e.dataTransfer.getData('text/plain')
-    if (id) onDrop(id)
+    const data = e.dataTransfer.getData('text/plain')
+    if (!data) return
+    try {
+      const { cardId, fromColumnId } = JSON.parse(data) as {
+        cardId: string
+        fromColumnId: string
+      }
+      onDrop(cardId, fromColumnId)
+    } catch {
+      // ignore invalid data
+    }
   }
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -36,7 +46,7 @@ export default function KanbanColumn({ title, items, onDrop }: KanbanColumnProps
         onDragOver={handleDragOver}
       >
         {items.map((item) => (
-          <KanbanCard key={item.id} id={item.id}>
+          <KanbanCard key={item.id} id={item.id} columnId={id}>
             {item.content}
           </KanbanCard>
         ))}

@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import { 
+  DndContext, 
+  DragEndEvent, 
+  MouseSensor, 
+  TouchSensor, 
+  useSensor, 
+  useSensors 
+} from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
 import CardDetailModal from './CardDetailModal'
 import { moveCard, addCard, updateCardDescription } from '@/app/actions'
@@ -23,6 +30,22 @@ export default function BoardClient({ initialData }: BoardClientProps) {
   const [selectedCard, setSelectedCard] = useState<KanbanItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [, startTransition] = useTransition()
+
+  // Configure sensors with activation constraints
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10, // 10px of movement required to start drag
+    },
+  })
+
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250, // 250ms press & hold to start drag
+      tolerance: 5, // 5px movement tolerance during delay
+    },
+  })
+
+  const sensors = useSensors(mouseSensor, touchSensor)
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -123,7 +146,7 @@ export default function BoardClient({ initialData }: BoardClientProps) {
 
   return (
     <>
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
           <KanbanColumn 
             id="todo"

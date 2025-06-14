@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import KanbanColumn, { KanbanItem } from '@/components/KanbanColumn'
+import { moveCard } from './actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -20,29 +21,49 @@ const initialState: BoardState = {
 
 export default function Home() {
   const [columns, setColumns] = useState<BoardState>(initialState)
+  const [, startTransition] = useTransition()
 
-  const handleDrop = (column: keyof BoardState) => (id: string) => {
-    setColumns((prev) => {
-      let moved: KanbanItem | undefined
-      const next: BoardState = { ...prev }
-      for (const key of Object.keys(next) as Array<keyof BoardState>) {
-        const idx = next[key].findIndex((i) => i.id === id)
-        if (idx !== -1) {
-          moved = next[key].splice(idx, 1)[0]
+  const handleDrop =
+    (to: keyof BoardState) =>
+    (cardId: string, from: string) => {
+      setColumns((prev) => {
+        let moved: KanbanItem | undefined
+        const next: BoardState = { ...prev }
+        for (const key of Object.keys(next) as Array<keyof BoardState>) {
+          const idx = next[key].findIndex((i) => i.id === cardId)
+          if (idx !== -1) {
+            moved = next[key].splice(idx, 1)[0]
+          }
         }
-      }
-      if (moved) {
-        next[column].push(moved)
-      }
-      return { ...next }
-    })
-  }
+        if (moved) {
+          next[to].push(moved)
+        }
+        return { ...next }
+      })
+
+      startTransition(() => moveCard(cardId, from, to))
+    }
 
   return (
     <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-      <KanbanColumn title="Todo" items={columns.todo} onDrop={handleDrop('todo')} />
-      <KanbanColumn title="In Progress" items={columns.progress} onDrop={handleDrop('progress')} />
-      <KanbanColumn title="Done" items={columns.done} onDrop={handleDrop('done')} />
+      <KanbanColumn
+        id="todo"
+        title="Todo"
+        items={columns.todo}
+        onDrop={handleDrop('todo')}
+      />
+      <KanbanColumn
+        id="progress"
+        title="In Progress"
+        items={columns.progress}
+        onDrop={handleDrop('progress')}
+      />
+      <KanbanColumn
+        id="done"
+        title="Done"
+        items={columns.done}
+        onDrop={handleDrop('done')}
+      />
     </main>
   )
 }

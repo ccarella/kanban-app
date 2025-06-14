@@ -14,6 +14,7 @@ export default function KanbanCard({
   columnId,
   className,
   children,
+  onClick,
   ...props
 }: KanbanCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -23,11 +24,19 @@ export default function KanbanCard({
     },
   })
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only fire onClick if we're not dragging
+    if (!isDragging && onClick) {
+      onClick(e)
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onClick={handleClick}
       className={cn(
         'bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm hover:shadow transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-grab',
         isDragging ? 'ring-2 ring-blue-500' : '',

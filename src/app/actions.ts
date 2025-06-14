@@ -154,11 +154,11 @@ export async function resetBoard() {
     // Create fresh board
     const freshBoard: BoardState = {
       todo: [
-        { id: '1', content: 'Add drag & drop' },
-        { id: '2', content: 'Style components' },
+        { id: '1', content: 'Add drag & drop', description: 'Implement drag and drop functionality between columns' },
+        { id: '2', content: 'Style components', description: 'Apply Tailwind CSS styling to all components' },
       ],
-      progress: [{ id: '3', content: 'Write docs' }],
-      done: [{ id: '4', content: 'Setup project' }],
+      progress: [{ id: '3', content: 'Write docs', description: 'Create comprehensive documentation for the project' }],
+      done: [{ id: '4', content: 'Setup project', description: 'Initial project setup with Next.js and TypeScript' }],
     }
     
     await redis.set('board', freshBoard)
@@ -169,6 +169,55 @@ export async function resetBoard() {
     revalidatePath('/')
   } catch (error) {
     console.error('Failed to reset board:', error)
+  }
+}
+
+export async function updateCardDescription(cardId: string, description: string) {
+  if (!redis) {
+    console.warn('Redis client not configured - changes will not persist')
+    return
+  }
+
+  console.log(`Updating description for card ${cardId}`)
+
+  try {
+    // Get current board state
+    const board = await redis.get<BoardState>('board')
+    
+    if (!board) {
+      console.error('No board found in Redis')
+      return
+    }
+
+    // Find and update the card across all columns
+    let cardFound = false
+    for (const columnId of ['todo', 'progress', 'done'] as const) {
+      const column = board[columnId]
+      const cardIndex = column.findIndex(item => item.id === cardId)
+      
+      if (cardIndex !== -1) {
+        column[cardIndex] = { ...column[cardIndex], description }
+        cardFound = true
+        console.log(`Updated card ${cardId} in column ${columnId}`)
+        break
+      }
+    }
+
+    if (!cardFound) {
+      console.warn(`Card ${cardId} not found in any column`)
+      return
+    }
+
+    // Save updated board state
+    await redis.set('board', board)
+    console.log('Card description updated successfully')
+
+    // Revalidate pages
+    revalidatePath('/board')
+    revalidatePath('/')
+  } catch (error) {
+    console.error('Failed to update card description:', error)
+    throw error
   }
 }
 
@@ -219,11 +268,11 @@ export async function getBoard(): Promise<BoardState> {
         console.log('Creating initial board...')
         board = {
           todo: [
-            { id: '1', content: 'Add drag & drop' },
-            { id: '2', content: 'Style components' },
+            { id: '1', content: 'Add drag & drop', description: 'Implement drag and drop functionality between columns' },
+            { id: '2', content: 'Style components', description: 'Apply Tailwind CSS styling to all components' },
           ],
-          progress: [{ id: '3', content: 'Write docs' }],
-          done: [{ id: '4', content: 'Setup project' }],
+          progress: [{ id: '3', content: 'Write docs', description: 'Create comprehensive documentation for the project' }],
+          done: [{ id: '4', content: 'Setup project', description: 'Initial project setup with Next.js and TypeScript' }],
         }
         await redis.set('board', board)
       }

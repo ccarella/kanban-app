@@ -7,6 +7,7 @@ import KanbanCard from './KanbanCard'
 export interface KanbanItem {
   id: string
   content: string
+  description?: string
 }
 
 interface KanbanColumnProps {
@@ -15,9 +16,10 @@ interface KanbanColumnProps {
   accent: string
   items: KanbanItem[]
   onAddCard?: (content: string) => void
+  onCardClick?: (card: KanbanItem) => void
 }
 
-export default function KanbanColumn({ id, title, accent, items, onAddCard }: KanbanColumnProps) {
+export default function KanbanColumn({ id, title, accent, items, onAddCard, onCardClick }: KanbanColumnProps) {
   const [inputValue, setInputValue] = useState('')
   const { setNodeRef } = useDroppable({
     id: id,
@@ -60,7 +62,12 @@ export default function KanbanColumn({ id, title, accent, items, onAddCard }: Ka
           />
         )}
         {items.map((item) => (
-          <KanbanCard key={item.id} id={item.id} columnId={id}>
+          <KanbanCard 
+            key={item.id} 
+            id={item.id} 
+            columnId={id}
+            onClick={() => onCardClick?.(item)}
+          >
             {item.content}
           </KanbanCard>
         ))}

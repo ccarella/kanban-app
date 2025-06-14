@@ -3,7 +3,8 @@
 import { useState, useTransition, useEffect } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
-import { moveCard, addCard } from '@/app/actions'
+import CardDetailModal from './CardDetailModal'
+import { moveCard, addCard, updateCardDescription } from '@/app/actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -19,6 +20,8 @@ const STORAGE_KEY = 'board-state'
 
 export default function BoardClient({ initialData }: BoardClientProps) {
   const [columns, setColumns] = useState<BoardState>(initialData)
+  const [selectedCard, setSelectedCard] = useState<KanbanItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [, startTransition] = useTransition()
 
   useEffect(() => {
@@ -36,6 +39,37 @@ export default function BoardClient({ initialData }: BoardClientProps) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(columns))
   }, [columns])
+
+  const handleCardClick = (card: KanbanItem) => {
+    setSelectedCard(card)
+    setIsModalOpen(true)
+  }
+
+  const handleUpdateDescription = async (cardId: string, description: string) => {
+    // Update local state
+    setColumns(prev => {
+      const newState = { ...prev }
+      for (const columnKey of Object.keys(newState) as Array<keyof BoardState>) {
+        const cardIndex = newState[columnKey].findIndex(card => card.id === cardId)
+        if (cardIndex !== -1) {
+          newState[columnKey][cardIndex] = { 
+            ...newState[columnKey][cardIndex], 
+            description 
+          }
+          break
+        }
+      }
+      return newState
+    })
+
+    // Update selected card
+    if (selectedCard?.id === cardId) {
+      setSelectedCard({ ...selectedCard, description })
+    }
+
+    // Persist to database
+    await updateCardDescription(cardId, description)
+  }
 
   const handleAddCard = (content: string) => {
     const newCard: KanbanItem = {
@@ -88,28 +122,39 @@ export default function BoardClient({ initialData }: BoardClientProps) {
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-        <KanbanColumn 
-          id="todo"
-          title="Todo" 
-          accent="border-orange-500" 
-          items={columns.todo}
-          onAddCard={handleAddCard}
-        />
-        <KanbanColumn 
-          id="progress"
-          title="In Progress" 
-          accent="border-blue-500" 
-          items={columns.progress} 
-        />
-        <KanbanColumn 
-          id="done"
-          title="Done" 
-          accent="border-green-500" 
-          items={columns.done} 
-        />
-      </main>
-    </DndContext>
+    <>
+      <DndContext onDragEnd={handleDragEnd}>
+        <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
+          <KanbanColumn 
+            id="todo"
+            title="Todo" 
+            accent="border-orange-500" 
+            items={columns.todo}
+            onAddCard={handleAddCard}
+            onCardClick={handleCardClick}
+          />
+          <KanbanColumn 
+            id="progress"
+            title="In Progress" 
+            accent="border-blue-500" 
+            items={columns.progress}
+            onCardClick={handleCardClick}
+          />
+          <KanbanColumn 
+            id="done"
+            title="Done" 
+            accent="border-green-500" 
+            items={columns.done}
+            onCardClick={handleCardClick}
+          />
+        </main>
+      </DndContext>
+      <CardDetailModal
+        card={selectedCard}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onUpdateDescription={handleUpdateDescription}
+      />
+    </>
   )
 }

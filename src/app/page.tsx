@@ -19,6 +19,8 @@ const initialState: BoardState = {
   done: [{ id: '4', content: 'Setup project' }],
 }
 
+const ACCENT = 'border-accent-primary'
+
 export default function Home() {
   const [columns, setColumns] = useState<BoardState>(initialState)
   const [, startTransition] = useTransition()
@@ -45,23 +47,26 @@ export default function Home() {
     }
 
   return (
-    <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
+    <main className="min-h-screen bg-neutral-100 p-6 md:p-8 grid auto-cols-fr md:grid-cols-3 gap-6 font-sans">
       <KanbanColumn
         id="todo"
         title="Todo"
         items={columns.todo}
+        accent={ACCENT}
         onDrop={handleDrop('todo')}
       />
       <KanbanColumn
         id="progress"
         title="In Progress"
         items={columns.progress}
+        accent={ACCENT}
         onDrop={handleDrop('progress')}
       />
       <KanbanColumn
         id="done"
         title="Done"
         items={columns.done}
+        accent={ACCENT}
         onDrop={handleDrop('done')}
       />
     </main>

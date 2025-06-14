@@ -7,6 +7,12 @@ module.exports = {
         sans: ['var(--font-inter)'],
         mono: ['var(--font-geist-mono)'],
       },
+      colors: {
+        accent: {
+          primary: '#FF7A00',
+          secondary: '#5D67FF',
+        },
+      },
     },
   },
   plugins: [],

@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import KanbanCard from './KanbanCard'
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
+import { cn } from '@/lib/utils'
 
 export interface KanbanItem {
   id: string
@@ -13,12 +13,16 @@ interface KanbanColumnProps {
   id: string
   title: string
   items: KanbanItem[]
+  accent: string
   onDrop: (cardId: string, fromColumnId: string) => void
 }
 
-export default function KanbanColumn({ id, title, items, onDrop }: KanbanColumnProps) {
+export default function KanbanColumn({ id, title, items, accent, onDrop }: KanbanColumnProps) {
+  const [dragOver, setDragOver] = useState(false)
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
+    setDragOver(false)
     const data = e.dataTransfer.getData('text/plain')
     if (!data) return
     try {
@@ -31,26 +35,31 @@ export default function KanbanColumn({ id, title, items, onDrop }: KanbanColumnP
       // ignore invalid data
     }
   }
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
+    if (!dragOver) setDragOver(true)
   }
 
+  const handleDragLeave = () => setDragOver(false)
+
   return (
-    <Card className="bg-muted/50">
-      <CardHeader className="p-4 border-b">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      </CardHeader>
-      <CardContent
-        className="flex flex-col gap-2 p-4 min-h-24"
+    <section className="flex flex-col bg-white/60 backdrop-blur-md border border-neutral-300 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+      <header className={cn(`px-4 py-3 text-xs font-semibold tracking-wider uppercase border-l-4 ${accent}`)}>
+        {title}
+      </header>
+      <div
+        className={cn('flex flex-col gap-3 p-4 grow', dragOver && 'ring-2 ring-[#5D67FF]')}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
       >
         {items.map((item) => (
           <KanbanCard key={item.id} id={item.id} columnId={id}>
             {item.content}
           </KanbanCard>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

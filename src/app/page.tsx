@@ -45,22 +45,25 @@ export default function Home() {
     }
 
   return (
-    <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
+    <main className="min-h-screen bg-neutral-100 p-6 md:p-8 grid auto-cols-fr md:grid-cols-3 gap-6 font-inter">
       <KanbanColumn
         id="todo"
         title="Todo"
+        accent="border-orange-500"
         items={columns.todo}
         onDrop={handleDrop('todo')}
       />
       <KanbanColumn
         id="progress"
         title="In Progress"
+        accent="border-blue-500"
         items={columns.progress}
         onDrop={handleDrop('progress')}
       />
       <KanbanColumn
         id="done"
         title="Done"
+        accent="border-emerald-500"
         items={columns.done}
         onDrop={handleDrop('done')}
       />

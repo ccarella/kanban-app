@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Card } from './ui/card'
 import { cn } from '@/lib/utils'
 
 export interface KanbanCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -24,13 +23,16 @@ export default function KanbanCard({
   }
 
   return (
-    <Card
+    <div
       draggable
       onDragStart={handleDragStart}
-      className={cn('bg-background p-3 rounded-md shadow-sm cursor-grab active:cursor-grabbing', className)}
+      className={cn(
+        'bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm hover:shadow transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-grab active:cursor-grabbing',
+        className
+      )}
       {...props}
     >
       {children}
-    </Card>
+    </div>
   )
 }

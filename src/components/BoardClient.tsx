@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from './KanbanColumn'
-import { moveCard, addCard } from '@/app/actions'
+import { moveCard, addCard, deleteCard } from '@/app/actions'
 
 interface BoardState {
   todo: KanbanItem[]
@@ -69,27 +69,41 @@ export default function BoardClient({ initialData }: BoardClientProps) {
     startTransition(() => moveCard(cardId, fromColumnId, toColumnId))
   }
 
+  const handleDeleteCard = (cardId: string, columnId: string) => {
+    setColumns(prev => {
+      const next: BoardState = { ...prev }
+      const column = columnId as keyof BoardState
+      next[column] = next[column].filter(c => c.id !== cardId)
+      return { ...next }
+    })
+
+    startTransition(() => deleteCard(cardId, columnId))
+  }
+
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-        <KanbanColumn 
+        <KanbanColumn
           id="todo"
-          title="Todo" 
-          accent="border-orange-500" 
+          title="Todo"
+          accent="border-orange-500"
           items={columns.todo}
           onAddCard={handleAddCard}
+          onDeleteCard={handleDeleteCard}
         />
-        <KanbanColumn 
+        <KanbanColumn
           id="progress"
-          title="In Progress" 
-          accent="border-blue-500" 
-          items={columns.progress} 
+          title="In Progress"
+          accent="border-blue-500"
+          items={columns.progress}
+          onDeleteCard={handleDeleteCard}
         />
-        <KanbanColumn 
+        <KanbanColumn
           id="done"
-          title="Done" 
-          accent="border-green-500" 
-          items={columns.done} 
+          title="Done"
+          accent="border-green-500"
+          items={columns.done}
+          onDeleteCard={handleDeleteCard}
         />
       </main>
     </DndContext>

@@ -15,9 +15,10 @@ interface KanbanColumnProps {
   accent: string
   items: KanbanItem[]
   onAddCard?: (content: string) => void
+  onDeleteCard?: (cardId: string, columnId: string) => void
 }
 
-export default function KanbanColumn({ id, title, accent, items, onAddCard }: KanbanColumnProps) {
+export default function KanbanColumn({ id, title, accent, items, onAddCard, onDeleteCard }: KanbanColumnProps) {
   const [inputValue, setInputValue] = useState('')
   const { setNodeRef } = useDroppable({
     id: id,
@@ -60,7 +61,12 @@ export default function KanbanColumn({ id, title, accent, items, onAddCard }: Ka
           />
         )}
         {items.map((item) => (
-          <KanbanCard key={item.id} id={item.id} columnId={id}>
+          <KanbanCard
+            key={item.id}
+            id={item.id}
+            columnId={id}
+            onDelete={onDeleteCard}
+          >
             {item.content}
           </KanbanCard>
         ))}

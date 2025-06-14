@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { unstable_cache } from 'next/cache'
 
-import { KanbanColumn } from '@/components'
+import { BoardClient } from '@/components'
 import type { KanbanItem } from '@/components/KanbanColumn'
 import { redis } from '@/lib/redis'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,20 +13,19 @@ interface BoardState {
 }
 
 const getBoard = unstable_cache(async () => {
-  const data = await redis.get<BoardState>('board')
-  if (data) return data
+  if (!redis) return { todo: [], progress: [], done: [] }
+  try {
+    const data = await redis.get<BoardState>('board')
+    if (data) return data
+  } catch {
+    return { todo: [], progress: [], done: [] }
+  }
   return { todo: [], progress: [], done: [] }
 }, ['board'])
 
 async function Board() {
   const board = await getBoard()
-  return (
-    <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-      <KanbanColumn title="Todo" items={board.todo} onDrop={() => {}} />
-      <KanbanColumn title="In Progress" items={board.progress} onDrop={() => {}} />
-      <KanbanColumn title="Done" items={board.done} onDrop={() => {}} />
-    </main>
-  )
+  return <BoardClient initialData={board} />
 }
 
 function ColumnSkeleton() {

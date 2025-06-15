@@ -45,7 +45,7 @@ export default function KanbanColumn({ id, title, accent, items, onAddCard, onCa
   }
 
   return (
-    <section className="flex flex-col bg-white/60 backdrop-blur-md border border-neutral-300 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+    <section className="flex flex-col bg-card/80 backdrop-blur-md border border-border rounded-2xl shadow-sm hover:shadow-md transition-shadow">
       <header className={`px-4 py-3 text-xs font-semibold tracking-wider uppercase border-l-4 ${accent}`}>{title}</header>
       <div
         ref={setNodeRef}
@@ -57,7 +57,7 @@ export default function KanbanColumn({ id, title, accent, items, onAddCard, onCa
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Type and press Enter to add a card..."
-            className="w-full px-3 py-2 text-sm bg-white border border-neutral-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-neutral-400 min-h-[36px]"
+            className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent placeholder:text-muted-foreground min-h-[36px]"
             rows={1}
           />
         )}

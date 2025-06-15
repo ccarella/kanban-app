@@ -122,7 +122,7 @@ export default function Home() {
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <main className="min-h-screen bg-neutral-100 p-6 md:p-8 grid auto-cols-fr md:grid-cols-3 gap-6 font-sans">
+      <main className="min-h-screen bg-background p-6 md:p-8 grid auto-cols-fr md:grid-cols-3 gap-6 font-sans">
         {lists.map((list) => (
           <KanbanColumn
             key={list.id}

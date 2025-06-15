@@ -46,6 +46,7 @@ cards:${cardId}            # Individual card data
 - **Drag & Drop**: Native HTML5 drag-and-drop API
 - **Type Safety**: Comprehensive TypeScript interfaces (`KanbanItem`, `BoardState`)
 - **Styling**: Tailwind CSS v4 with glass-morphism design
+- **Dark Mode**: Tokyo Night-inspired dark theme as default, using CSS variables
 - **Error Handling**: Redis client checks for availability before operations
 
 ## Environment Setup

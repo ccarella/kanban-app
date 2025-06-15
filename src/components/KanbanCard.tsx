@@ -16,7 +16,6 @@ export default function KanbanCard({
   columnId,
   className,
   children,
-  description,
   onClick,
   ...props
 }: KanbanCardProps) {
@@ -57,12 +56,10 @@ export default function KanbanCard({
           <div className="select-none">{children}</div>
           
           <ExpandableContent isExpanded={isExpanded}>
-            {description && (
-              <div className="text-sm text-neutral-600 border-t border-neutral-200 pt-2 mt-2">
-                <p className="font-medium text-xs text-neutral-500 mb-1">Details:</p>
-                <p className="whitespace-pre-wrap">{description}</p>
-              </div>
-            )}
+            <div className="text-sm text-neutral-600 border-t border-neutral-200 pt-2 mt-2">
+              <p className="font-medium text-xs text-neutral-500 mb-1">Details:</p>
+              <p className="whitespace-pre-wrap">Create a new branch for this feature. Implement it, create Tests when relevant, run no test and fix any broken tests, give me a summary of what was done, update Claude.md with anything relevant for future development (but be picky and brief), make a PR, monitor the PR&apos;s tests, if they fail fix them and try again, if they succeed let me know the branch is safe to be merged.</p>
+            </div>
           </ExpandableContent>
         </div>
       </ExpandableCard>

@@ -1,6 +1,13 @@
 import { moveCard, addCard, resetBoard, updateCardDescription, getBoard } from '../actions'
 import { redis } from '@/lib/redis'
 import { revalidatePath } from 'next/cache'
+import type { KanbanItem } from '@/components/KanbanColumn'
+
+interface BoardState {
+  todo: KanbanItem[]
+  progress: KanbanItem[]
+  done: KanbanItem[]
+}
 
 // Mock dependencies
 jest.mock('@/lib/redis', () => {
@@ -93,7 +100,7 @@ describe('Server Actions', () => {
       // Verify the card was added
       const setCall = mockRedis.set.mock.calls[0]
       expect(setCall[0]).toBe('board')
-      const updatedBoard = setCall[1] as any
+      const updatedBoard = setCall[1] as BoardState
       expect(updatedBoard.todo).toHaveLength(3)
       expect(updatedBoard.todo[2].content).toBe('New Task')
       expect(updatedBoard.todo[2].id).toMatch(/^card-\d+-[a-z0-9]+$/)
@@ -110,7 +117,7 @@ describe('Server Actions', () => {
 
       // Should create a new board with the card
       const setCall = mockRedis.set.mock.calls[0]
-      const newBoard = setCall[1] as any
+      const newBoard = setCall[1] as BoardState
       expect(newBoard.todo).toHaveLength(1)
       expect(newBoard.todo[0].content).toBe('New Task')
     })
@@ -147,7 +154,7 @@ describe('Server Actions', () => {
 
       // Verify the description was updated in the progress column
       const setCall = mockRedis.set.mock.calls[0]
-      const updatedBoard = setCall[1] as any
+      const updatedBoard = setCall[1] as BoardState
       expect(updatedBoard.progress[0].description).toBe('Progress task description')
     })
 
@@ -171,7 +178,7 @@ describe('Server Actions', () => {
 
       // Verify new board is created
       const setCall = mockRedis.set.mock.calls[0]
-      const newBoard = setCall[1] as any
+      const newBoard = setCall[1] as BoardState
       expect(newBoard.todo).toHaveLength(2)
       expect(newBoard.progress).toHaveLength(1)
       expect(newBoard.done).toHaveLength(1)
@@ -194,12 +201,12 @@ describe('Server Actions', () => {
       mockRedis.get.mockResolvedValue(null)
       mockRedis.lrange.mockResolvedValue([])
 
-      const board = await getBoard()
+      await getBoard()
 
       // Should create and save initial board
       expect(mockRedis.set).toHaveBeenCalled()
       const setCall = mockRedis.set.mock.calls[0]
-      const newBoard = setCall[1] as any
+      const newBoard = setCall[1] as BoardState
       expect(newBoard.todo).toHaveLength(2)
       expect(newBoard.progress).toHaveLength(1)
       expect(newBoard.done).toHaveLength(1)
@@ -212,7 +219,7 @@ describe('Server Actions', () => {
         .mockResolvedValueOnce(['card-3']) // progress
         .mockResolvedValueOnce(['card-4']) // done
 
-      const board = await getBoard()
+      await getBoard()
 
       // Should migrate old structure
       expect(mockRedis.lrange).toHaveBeenCalledWith('columns:todo:cards', 0, -1)
@@ -221,7 +228,7 @@ describe('Server Actions', () => {
 
       // Should save migrated board
       const setCall = mockRedis.set.mock.calls[0]
-      const migratedBoard = setCall[1] as any
+      const migratedBoard = setCall[1] as BoardState
       expect(migratedBoard.todo).toHaveLength(2)
       expect(migratedBoard.todo[0].id).toBe('card-1')
       expect(migratedBoard.todo[0].content).toBe('Card card-1')
@@ -241,18 +248,20 @@ describe('Server Actions', () => {
   })
 
   describe('Redis not configured', () => {
-    let originalRedis: any
+    let originalRedis: typeof redis
 
     beforeEach(() => {
       // Store original redis mock
-      originalRedis = require('@/lib/redis').redis
+      originalRedis = jest.requireActual('@/lib/redis').redis
       // Set redis to null
-      require('@/lib/redis').redis = null
+      const redisModule = jest.requireMock('@/lib/redis')
+      redisModule.redis = null
     })
 
     afterEach(() => {
       // Restore redis mock
-      require('@/lib/redis').redis = originalRedis
+      const redisModule = jest.requireMock('@/lib/redis')
+      redisModule.redis = originalRedis
     })
 
     it('handles missing Redis client in moveCard', async () => {

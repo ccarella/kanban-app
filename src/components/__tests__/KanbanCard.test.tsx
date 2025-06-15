@@ -32,7 +32,7 @@ describe('KanbanCard', () => {
       disabled: false,
       data: null,
       activators: [],
-    } as any)
+    } as ReturnType<typeof useDraggable>)
   })
 
   afterEach(() => {
@@ -82,7 +82,7 @@ describe('KanbanCard', () => {
       disabled: false,
       data: null,
       activators: [],
-    } as any)
+    } as ReturnType<typeof useDraggable>)
 
     const { container } = render(
       <KanbanCard {...defaultProps}>
@@ -111,7 +111,7 @@ describe('KanbanCard', () => {
       disabled: false,
       data: null,
       activators: [],
-    } as any)
+    } as ReturnType<typeof useDraggable>)
 
     render(
       <KanbanCard {...defaultProps} onClick={mockOnClick}>

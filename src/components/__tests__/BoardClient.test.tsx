@@ -1,8 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@/test-utils/render'
 import BoardClient from '../BoardClient'
-import { DndContext } from '@dnd-kit/core'
-import { moveCard, addCard, updateCardDescription } from '@/app/actions'
+import { moveCard, addCard } from '@/app/actions'
 import { mockBoard } from '@/test-utils/mock-data'
 
 // Mock actions
@@ -12,11 +11,20 @@ jest.mock('@/app/actions', () => ({
   updateCardDescription: jest.fn(),
 }))
 
+interface DndContextProps {
+  children: React.ReactNode
+  onDragEnd: (event: { active: { id: string; data: { current: { columnId: string } } }; over: { id: string } | null }) => void
+}
+
+interface GlobalWithMockDragEnd extends NodeJS.Global {
+  mockDragEnd?: (event: { active: { id: string; data: { current: { columnId: string } } }; over: { id: string } | null }) => void
+}
+
 // Mock @dnd-kit/core
 jest.mock('@dnd-kit/core', () => ({
-  DndContext: ({ children, onDragEnd }: any) => {
+  DndContext: ({ children, onDragEnd }: DndContextProps) => {
     // Store onDragEnd for manual triggering in tests
-    ;(global as any).mockDragEnd = onDragEnd
+    ;(global as GlobalWithMockDragEnd).mockDragEnd = onDragEnd
     return <div data-testid="dnd-context">{children}</div>
   },
   useSensor: jest.fn((sensor) => sensor),
@@ -48,12 +56,11 @@ const localStorageMock = (() => {
     }),
   }
 })()
-global.localStorage = localStorageMock as any
+global.localStorage = localStorageMock as Storage
 
 describe('BoardClient', () => {
   const mockMoveCard = moveCard as jest.MockedFunction<typeof moveCard>
   const mockAddCard = addCard as jest.MockedFunction<typeof addCard>
-  const mockUpdateCardDescription = updateCardDescription as jest.MockedFunction<typeof updateCardDescription>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -153,7 +160,7 @@ describe('BoardClient', () => {
     }} />)
 
     // Simulate drag end event
-    const mockDragEnd = (global as any).mockDragEnd
+    const mockDragEnd = (global as GlobalWithMockDragEnd).mockDragEnd!
     mockDragEnd({
       active: {
         id: 'card-1',
@@ -184,7 +191,7 @@ describe('BoardClient', () => {
       done: [],
     }} />)
 
-    const mockDragEnd = (global as any).mockDragEnd
+    const mockDragEnd = (global as GlobalWithMockDragEnd).mockDragEnd!
     mockDragEnd({
       active: {
         id: 'card-1',

@@ -39,7 +39,7 @@ describe('KanbanColumn', () => {
       rect: null,
       disabled: false,
       data: null,
-    } as any)
+    } as ReturnType<typeof useDroppable>)
   })
 
   afterEach(() => {

@@ -59,7 +59,7 @@ export default function Home() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    
+
     if (!over || active.id === over.id) {
       return
     }
@@ -67,6 +67,10 @@ export default function Home() {
     const cardId = active.id as string
     const fromColumnId = active.data.current?.columnId as string
     const toColumnId = over.id as string
+
+    if (fromColumnId === toColumnId) {
+      return
+    }
 
     setColumns((prev) => {
       let moved: KanbanItem | undefined
@@ -88,6 +92,7 @@ export default function Home() {
       return { ...next }
     })
 
+    // Persist to database only if the card moved columns
     startTransition(() => moveCard(cardId, fromColumnId, toColumnId))
   }
 

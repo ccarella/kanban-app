@@ -35,6 +35,10 @@ export async function moveCard(
     return
   }
 
+  if (fromColumnId === toColumnId) {
+    return
+  }
+
   console.log(`Moving card ${cardId} from ${fromColumnId} to ${toColumnId}`)
 
   try {

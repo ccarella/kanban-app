@@ -111,7 +111,7 @@ export default function BoardClient({ initialData }: BoardClientProps) {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    
+
     if (!over || active.id === over.id) {
       return
     }
@@ -119,6 +119,10 @@ export default function BoardClient({ initialData }: BoardClientProps) {
     const cardId = active.id as string
     const fromColumnId = active.data.current?.columnId as string
     const toColumnId = over.id as string
+
+    if (fromColumnId === toColumnId) {
+      return
+    }
 
     setColumns((prev) => {
       let moved: KanbanItem | undefined
@@ -140,7 +144,7 @@ export default function BoardClient({ initialData }: BoardClientProps) {
       return { ...next }
     })
 
-    // Persist to database
+    // Persist to database only if the card moved columns
     startTransition(() => moveCard(cardId, fromColumnId, toColumnId))
   }
 

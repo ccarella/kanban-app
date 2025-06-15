@@ -50,8 +50,11 @@ export default function KanbanCard({
       if (typeof child === 'string' || typeof child === 'number') {
         return String(child)
       }
-      if (React.isValidElement(child) && child.props.children) {
-        return getTextFromChildren(child.props.children)
+      if (React.isValidElement(child)) {
+        const element = child as React.ReactElement<{ children?: React.ReactNode }>
+        if (element.props && element.props.children) {
+          return getTextFromChildren(element.props.children)
+        }
       }
       return ''
     }).join('')

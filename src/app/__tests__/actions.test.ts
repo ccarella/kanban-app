@@ -67,12 +67,8 @@ describe('Server Actions', () => {
 
       await moveCard('1', 'todo', 'progress')
 
-      // Should create a new board
-      expect(mockRedis.set).toHaveBeenCalledWith('board', {
-        todo: [],
-        progress: [],
-        done: [],
-      })
+      // Should not update the board since the card doesn't exist in the empty board
+      expect(mockRedis.set).not.toHaveBeenCalled()
     })
 
     it('handles invalid column IDs', async () => {

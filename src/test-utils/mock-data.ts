@@ -1,19 +1,12 @@
-import { KanbanItem, BoardState } from '@/types/kanban'
+import { KanbanItem } from '@/components/KanbanColumn'
 
 export const mockCard: KanbanItem = {
   id: 'card-1',
-  title: 'Test Card',
+  content: 'Test Card',
   description: 'Test Description',
-  priority: 'medium',
-  dueDate: '2024-12-25',
-  tags: ['test', 'mock'],
 }
 
-export const mockColumn: BoardState = {
-  id: 'col-1',
-  name: 'To Do',
-  cards: [mockCard],
-}
+// Note: BoardState doesn't seem to be defined, removing this export
 
 export const mockBoard = {
   id: 'board-1',
@@ -24,11 +17,8 @@ export const mockBoard = {
       cards: [
         {
           id: 'card-1',
-          title: 'Task 1',
+          content: 'Task 1',
           description: 'Description 1',
-          priority: 'high',
-          dueDate: '2024-12-25',
-          tags: ['urgent'],
         },
       ],
     },

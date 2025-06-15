@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, createContext, useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -10,6 +10,11 @@ interface ExpandableProps {
   onToggle?: () => void
   className?: string
 }
+
+const ExpandableContext = createContext<{
+  isExpanded: boolean
+  toggle: () => void
+} | null>(null)
 
 export function Expandable({
   children,
@@ -30,11 +35,41 @@ export function Expandable({
   }, [isControlled, onToggle])
 
   return (
-    <div className={className}>
-      {typeof children === 'function' 
-        ? children({ isExpanded: currentExpanded, toggle: handleToggle })
-        : children
-      }
+    <ExpandableContext.Provider value={{ isExpanded: currentExpanded, toggle: handleToggle }}>
+      <div className={className}>
+        {typeof children === 'function'
+          ? children({ isExpanded: currentExpanded, toggle: handleToggle })
+          : children
+        }
+      </div>
+    </ExpandableContext.Provider>
+  )
+}
+
+export function useExpandable() {
+  const context = useContext(ExpandableContext)
+  if (!context) {
+    throw new Error('useExpandable must be used within an Expandable')
+  }
+  return context
+}
+
+export function ExpandableTrigger({
+  className,
+  children,
+  onClick,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  const { toggle } = useExpandable()
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    toggle()
+    onClick?.(e)
+  }
+
+  return (
+    <div className={className} onClick={handleClick} {...props}>
+      {children}
     </div>
   )
 }

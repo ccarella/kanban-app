@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { cn } from '@/lib/utils'
-import { Expandable, ExpandableCard, ExpandableContent } from './ui/expandable'
+import { Expandable, ExpandableCard, ExpandableContent, ExpandableTrigger } from './ui/expandable'
 
 export interface KanbanCardProps extends React.HTMLAttributes<HTMLDivElement> {
   id: string
@@ -20,7 +20,6 @@ export default function KanbanCard({
   onClick,
   ...props
 }: KanbanCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: id,
     data: {
@@ -28,44 +27,47 @@ export default function KanbanCard({
     },
   })
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (toggle: () => void) => (e: React.MouseEvent<HTMLDivElement>) => {
     // Prevent click during drag
     if (!isDragging) {
       e.stopPropagation()
-      setIsExpanded(!isExpanded)
+      toggle()
       onClick?.(e)
     }
   }
 
   return (
-    <Expandable expanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)}>
-      <ExpandableCard
-        className={cn(
-          'bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm hover:shadow transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0',
-          isDragging ? 'ring-2 ring-blue-500 cursor-grabbing' : 'cursor-pointer',
-          isExpanded ? 'shadow-md' : '',
-          className
-        )}
-      >
-        <div
-          ref={setNodeRef}
-          {...attributes}
-          {...listeners}
-          onClick={handleClick}
-          {...props}
+    <Expandable>
+      {({ isExpanded, toggle }) => (
+        <ExpandableCard
+          className={cn(
+            'bg-white border border-neutral-300 rounded-xl px-4 py-3 text-sm hover:shadow transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0',
+            isDragging ? 'ring-2 ring-blue-500 cursor-grabbing' : 'cursor-pointer',
+            isExpanded ? 'shadow-md' : '',
+            className
+          )}
         >
-          <div className="select-none">{children}</div>
-          
-          <ExpandableContent isExpanded={isExpanded}>
-            {description && (
-              <div className="text-sm text-neutral-600 border-t border-neutral-200 pt-2 mt-2">
-                <p className="font-medium text-xs text-neutral-500 mb-1">Details:</p>
-                <p className="whitespace-pre-wrap">{description}</p>
-              </div>
-            )}
-          </ExpandableContent>
-        </div>
-      </ExpandableCard>
+          <ExpandableTrigger onClick={handleClick(toggle)}>
+            <div
+              ref={setNodeRef}
+              {...attributes}
+              {...listeners}
+              {...props}
+            >
+              <div className="select-none">{children}</div>
+
+              <ExpandableContent isExpanded={isExpanded}>
+                {description && (
+                  <div className="text-sm text-neutral-600 border-t border-neutral-200 pt-2 mt-2">
+                    <p className="font-medium text-xs text-neutral-500 mb-1">Details:</p>
+                    <p className="whitespace-pre-wrap">{description}</p>
+                  </div>
+                )}
+              </ExpandableContent>
+            </div>
+          </ExpandableTrigger>
+        </ExpandableCard>
+      )}
     </Expandable>
   )
 }

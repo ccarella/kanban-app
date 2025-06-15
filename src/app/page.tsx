@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragEndEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 import KanbanColumn, { KanbanItem } from '@/components/KanbanColumn'
 import { moveCard, addCard } from './actions'
 
@@ -25,6 +32,22 @@ const STORAGE_KEY = 'board-state'
 export default function Home() {
   const [columns, setColumns] = useState<BoardState>(initialState)
   const [, startTransition] = useTransition()
+
+  // Configure sensors with activation constraints
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10, // 10px of movement required to start drag
+    },
+  })
+
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250, // 250ms press & hold to start drag
+      tolerance: 5, // 5px movement tolerance during delay
+    },
+  })
+
+  const sensors = useSensors(mouseSensor, touchSensor)
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -81,7 +104,7 @@ export default function Home() {
       
       // Add the card to the target column
       const toColumn = toColumnId as keyof BoardState
-      if (moved && fromColumn !== toColumn) {
+      if (moved) {
         next[toColumn].push(moved)
       }
       
@@ -98,7 +121,7 @@ export default function Home() {
   ]
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <main className="min-h-screen bg-neutral-100 p-6 md:p-8 grid auto-cols-fr md:grid-cols-3 gap-6 font-sans">
         {lists.map((list) => (
           <KanbanColumn

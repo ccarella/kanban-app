@@ -59,30 +59,30 @@ export default function Home() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    
-    if (!over || active.id === over.id) {
-      return
-    }
 
     const cardId = active.id as string
     const fromColumnId = active.data.current?.columnId as string
-    const toColumnId = over.id as string
+    const toColumnId = (over?.id as string) ?? fromColumnId
 
     setColumns((prev) => {
       let moved: KanbanItem | undefined
       const next: BoardState = { ...prev }
-      
+
       // Find and remove the card from its current column
       const fromColumn = fromColumnId as keyof BoardState
       const idx = next[fromColumn].findIndex((i) => i.id === cardId)
       if (idx !== -1) {
         moved = next[fromColumn].splice(idx, 1)[0]
       }
-      
+
       // Add the card to the target column
       const toColumn = toColumnId as keyof BoardState
-      if (moved && fromColumn !== toColumn) {
-        next[toColumn].push(moved)
+      if (moved) {
+        if (fromColumn === toColumn) {
+          next[toColumn].splice(idx, 0, moved)
+        } else {
+          next[toColumn].push(moved)
+        }
       }
       
       return { ...next }

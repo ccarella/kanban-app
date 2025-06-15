@@ -90,7 +90,7 @@ describe('KanbanCard', () => {
       </KanbanCard>
     )
 
-    const cardElement = container.querySelector('.ring-2.ring-blue-500.cursor-grabbing')
+    const cardElement = container.querySelector('.ring-2.ring-ring.cursor-grabbing')
     expect(cardElement).toBeInTheDocument()
   })
 

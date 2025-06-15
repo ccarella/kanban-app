@@ -52,7 +52,7 @@ export default function CardDetailModal({
           <DialogTitle className="text-xl font-semibold">{card.content}</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
-          <label htmlFor="description" className="text-sm font-medium text-gray-700 block mb-2">
+          <label htmlFor="description" className="text-sm font-medium text-foreground block mb-2">
             Description/Prompt
           </label>
           <textarea
@@ -60,11 +60,11 @@ export default function CardDetailModal({
             value={description}
             onChange={(e) => handleDescriptionChange(e.target.value)}
             placeholder="Add a more detailed description..."
-            className="w-full min-h-[150px] p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full min-h-[150px] p-3 border border-border rounded-lg resize-none focus:ring-2 focus:ring-ring focus:border-transparent"
             disabled={isSaving}
           />
           {isSaving && (
-            <p className="text-sm text-gray-500 mt-1">Saving...</p>
+            <p className="text-sm text-muted-foreground mt-1">Saving...</p>
           )}
         </div>
       </DialogContent>

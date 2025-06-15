@@ -133,7 +133,7 @@ export default function BoardClient({ initialData }: BoardClientProps) {
       
       // Add the card to the target column
       const toColumn = toColumnId as keyof BoardState
-      if (moved && fromColumn !== toColumn) {
+      if (moved) {
         next[toColumn].push(moved)
       }
       

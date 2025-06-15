@@ -148,27 +148,30 @@ export default function BoardClient({ initialData }: BoardClientProps) {
     <>
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <main className="container mx-auto py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-          <KanbanColumn 
+          <KanbanColumn
             id="todo"
-            title="Todo" 
-            accent="border-orange-500" 
+            title="Todo"
+            accent="border-orange-500"
             items={columns.todo}
             onAddCard={handleAddCard}
             onCardClick={handleCardClick}
+            onUpdateDescription={handleUpdateDescription}
           />
-          <KanbanColumn 
+          <KanbanColumn
             id="progress"
-            title="In Progress" 
-            accent="border-blue-500" 
+            title="In Progress"
+            accent="border-blue-500"
             items={columns.progress}
             onCardClick={handleCardClick}
+            onUpdateDescription={handleUpdateDescription}
           />
-          <KanbanColumn 
+          <KanbanColumn
             id="done"
-            title="Done" 
-            accent="border-green-500" 
+            title="Done"
+            accent="border-green-500"
             items={columns.done}
             onCardClick={handleCardClick}
+            onUpdateDescription={handleUpdateDescription}
           />
         </main>
       </DndContext>

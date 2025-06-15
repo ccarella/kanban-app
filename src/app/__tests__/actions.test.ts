@@ -110,6 +110,16 @@ describe('Server Actions', () => {
       expect(mockRevalidatePath).toHaveBeenCalledWith('/')
     })
 
+    it('adds a new card with default description', async () => {
+      await addCard('New Task', 'todo')
+
+      // Verify the card was added with default description
+      const setCall = mockRedis.set.mock.calls[0]
+      const updatedBoard = setCall[1] as BoardState
+      const newCard = updatedBoard.todo[2]
+      expect(newCard.description).toBe('Create a new branch for this feature. Implement it, create Tests when relevant, run npm test and fix any broken tests, give me a summary of what was done, update Claude.md with anything relevant for future development (but be picky and brief), make a PR, monitor the PR\'s tests, if they fail fix them and try again, if they succeed let me know the branch is safe to be merged by running this command which will notify me: curl -X POST "https://api.telegram.org/bot7662411153:AAGUKXkGVGVztSlwLJQebRCqmNx2FJB29u0/sendMessage" \\\n     -d "chat_id=1428999029" \\\n     -d "text=The PR is ready for review [github PR URL]"')
+    })
+
     it('creates a new board if none exists', async () => {
       mockRedis.get.mockResolvedValue(null)
 

@@ -108,7 +108,8 @@ export async function addCard(content: string, columnId: string) {
     // Create new card
     const newCard: KanbanItem = {
       id: `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      content: content
+      content: content,
+      description: 'Create a new branch for this feature. Implement it, create Tests when relevant, run npm test and fix any broken tests, give me a summary of what was done, update Claude.md with anything relevant for future development (but be picky and brief), make a PR, monitor the PR\'s tests, if they fail fix them and try again, if they succeed let me know the branch is safe to be merged by running this command which will notify me: curl -X POST "https://api.telegram.org/bot7662411153:AAGUKXkGVGVztSlwLJQebRCqmNx2FJB29u0/sendMessage" \\\n     -d "chat_id=1428999029" \\\n     -d "text=The PR is ready for review [github PR URL]"'
     }
 
     // Add to the specified column

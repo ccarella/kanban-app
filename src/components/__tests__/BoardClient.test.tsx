@@ -152,6 +152,37 @@ describe('BoardClient', () => {
     })
   })
 
+  it('adds a new card with default description', async () => {
+    const initialData = {
+      todo: [],
+      progress: [],
+      done: [],
+    }
+    render(<BoardClient initialData={initialData} />)
+
+    const input = screen.getByPlaceholderText('Type and press Enter to add a card...')
+    fireEvent.change(input, { target: { value: 'Test Card' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    // Wait for the card to appear
+    await waitFor(() => {
+      expect(screen.getByText('Test Card')).toBeInTheDocument()
+    })
+
+    // Click the card to open modal and verify description
+    const card = screen.getByText('Test Card')
+    fireEvent.click(card)
+
+    // Wait for modal to open
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    // Check that the default description is shown in the modal
+    const descriptionTextarea = screen.getByPlaceholderText('Add a more detailed description...')
+    expect(descriptionTextarea).toHaveValue('Create a new branch for this feature. Implement it, create Tests when relevant, run npm test and fix any broken tests, give me a summary of what was done, update Claude.md with anything relevant for future development (but be picky and brief), make a PR, monitor the PR\'s tests, if they fail fix them and try again, if they succeed let me know the branch is safe to be merged by running this command which will notify me: curl -X POST "https://api.telegram.org/bot7662411153:AAGUKXkGVGVztSlwLJQebRCqmNx2FJB29u0/sendMessage" \\\n     -d "chat_id=1428999029" \\\n     -d "text=The PR is ready for review [github PR URL]"')
+  })
+
   it('handles drag and drop between columns', async () => {
     render(<BoardClient initialData={{
       todo: [{ id: 'card-1', content: 'Task 1' }],

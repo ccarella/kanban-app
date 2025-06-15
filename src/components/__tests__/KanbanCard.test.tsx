@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@/test-utils/render'
+import { render, screen, fireEvent, waitFor } from '@/test-utils/render'
 import KanbanCard from '../KanbanCard'
 import { useDraggable } from '@dnd-kit/core'
 
@@ -7,6 +7,13 @@ import { useDraggable } from '@dnd-kit/core'
 jest.mock('@dnd-kit/core', () => ({
   useDraggable: jest.fn(),
 }))
+
+// Mock clipboard API
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn(),
+  },
+})
 
 describe('KanbanCard', () => {
   const mockUseDraggable = useDraggable as jest.MockedFunction<typeof useDraggable>
@@ -64,7 +71,7 @@ describe('KanbanCard', () => {
 
     // Description should now be visible
     expect(screen.getByText('Details:')).toBeInTheDocument()
-    expect(screen.getByText('Create a new branch for this feature. Implement it, create Tests when relevant, run no test and fix any broken tests, give me a summary of what was done, update Claude.md with anything relevant for future development (but be picky and brief), make a PR, monitor the PR\'s tests, if they fail fix them and try again, if they succeed let me know the branch is safe to be merged.')).toBeInTheDocument()
+    expect(screen.getByText('Test description')).toBeInTheDocument()
   })
 
   it('applies dragging styles when being dragged', () => {
@@ -152,5 +159,86 @@ describe('KanbanCard', () => {
         columnId: 'col-1',
       },
     })
+  })
+
+  it('does not show expandable content when no description is provided', () => {
+    render(
+      <KanbanCard id="card-1" columnId="col-1">
+        <div>Test Card</div>
+      </KanbanCard>
+    )
+
+    // Click to expand
+    fireEvent.click(screen.getByText('Test Card'))
+
+    // No description content should be shown
+    expect(screen.queryByText('Details:')).not.toBeInTheDocument()
+  })
+
+  it('copies card details to clipboard when copy button is clicked', async () => {
+    const writeTextMock = jest.spyOn(navigator.clipboard, 'writeText')
+    
+    render(
+      <KanbanCard {...defaultProps} title="Test Title">
+        <div>Test Card</div>
+      </KanbanCard>
+    )
+
+    // Click to expand
+    fireEvent.click(screen.getByText('Test Card'))
+
+    // Click copy button
+    const copyButton = screen.getByLabelText('Copy card details')
+    fireEvent.click(copyButton)
+
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith('Feature: Test Title - Test description')
+    })
+  })
+
+  it('uses children as title when title prop is not provided', async () => {
+    const writeTextMock = jest.spyOn(navigator.clipboard, 'writeText')
+    
+    render(
+      <KanbanCard {...defaultProps}>
+        <div>Test Card Content</div>
+      </KanbanCard>
+    )
+
+    // Click to expand
+    fireEvent.click(screen.getByText('Test Card Content'))
+
+    // Click copy button
+    const copyButton = screen.getByLabelText('Copy card details')
+    fireEvent.click(copyButton)
+
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith('Feature: Test Card Content - Test description')
+    })
+  })
+
+  it('handles copy error gracefully', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const writeTextMock = jest.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('Copy failed'))
+    
+    render(
+      <KanbanCard {...defaultProps}>
+        <div>Test Card</div>
+      </KanbanCard>
+    )
+
+    // Click to expand
+    fireEvent.click(screen.getByText('Test Card'))
+
+    // Click copy button
+    const copyButton = screen.getByLabelText('Copy card details')
+    fireEvent.click(copyButton)
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to copy text:', expect.any(Error))
+    })
+
+    consoleErrorSpy.mockRestore()
+    writeTextMock.mockRestore()
   })
 })

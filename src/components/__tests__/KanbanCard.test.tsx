@@ -64,7 +64,7 @@ describe('KanbanCard', () => {
 
     // Description should now be visible
     expect(screen.getByText('Details:')).toBeInTheDocument()
-    expect(screen.getByText('Test description')).toBeInTheDocument()
+    expect(screen.getByText('Create a new branch for this feature. Implement it, create Tests when relevant, run no test and fix any broken tests, give me a summary of what was done, update Claude.md with anything relevant for future development (but be picky and brief), make a PR, monitor the PR\'s tests, if they fail fix them and try again, if they succeed let me know the branch is safe to be merged.')).toBeInTheDocument()
   })
 
   it('applies dragging styles when being dragged', () => {
